@@ -1,55 +1,4 @@
 <?php
-function olistbox($background, $title, $list) { ?>
-	<div class="card text-white text-center bg-light mb-5" style=" width: 380px; height: 150px; background-color: <?php echo $background ?>; margin: 5px auto;">
-		<div class="card-header" style="background-color:<?php echo $background ?>;">
-			<h5><?php echo $title ?></h5>
-		</div>
-		<div class="card-body" style="background-color:<?php echo $background ?>;">
-			<ol style="text-align:left;">
-				<?php
-					//generate list from array
-					foreach ($list as $listItem) {
-						echo "<li>".$listItem."</li>\n";
-					}
-				?>
-			</ol>
-		</div>
-	</div>
-<?php } ?>
-<?php
-
-function ulistbox($background, $title, $list) { ?>
-	<div class="card text-white text-center bg-light mb-5" style=" width: 380px; height: 150px; background-color: <?php echo $background ?>; margin: 5px auto;">
-		<div class="card-header" style="background-color:<?php echo $background ?>;">
-			<h5><?php echo $title ?></h5>
-		</div>
-		<div class="card-body" style="background-color:<?php echo $background ?>;">
-			<ul style="text-align:left;">
-				<?php
-					//generate list from array
-					foreach ($list as $listItem) {
-						echo "<li>".$listItem."</li>\n";
-					}
-				?>
-			</ol>
-		</div>
-	</div>
-<?php } ?>
-
-
-<?php
-function simpleBox($background, $icon, $title, $value) { ?>
-	<div class="card text-white bg-light text-center mb-5" style="min-width: 11rem; max-width: 20rem;">
-		<div class="card-header" style="background-color:<?php echo $background ?>;">
-			<h6><?php echo $title ?></h6>
-		</div>
-		<div class="card-body" style="background-color:<?php echo $background ?>;">
-			<h5><i class="<?php echo $icon ?>"></i> <?php echo $value ?></h5>
-		</div>
-	</div>
-<?php } ?>
-
-<?php
 function fileTableRow($rowNum, $name, $tags, $adminPriv) { ?>
     <tr>
 	    <th scope="row" style="text-align: center;"><?php echo $rowNum;?></th>
@@ -62,5 +11,19 @@ function fileTableRow($rowNum, $name, $tags, $adminPriv) { ?>
 		</td>
 	</tr>
 <?php   
+}
+?>
+
+<?php
+function splitFileName($text, $maxLength) {
+	$formatted = substr($text, 0, $maxLength);
+	$remaining = substr($text, $maxLength);
+	
+	while (strlen($remaining) > $maxLength) {
+		$formatted = $formatted . "<br>" . substr($remaining, 0, $maxLength);
+		$remaining = substr($remaining, $maxLength);
+	}
+	
+	return $formatted . "<br>" . $remaining;
 }
 ?>
