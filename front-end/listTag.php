@@ -50,13 +50,18 @@ if (isset($_SESSION["username"])) {
                         </thead>
                         <tbody>
                             <?php
-                            $stmt = $connection->prepare("SELECT * FROM file");
-                            $stmt->execute() or die(mysqli_error());
+                            $fileStmt = $connection->prepare("SELECT f.name, ft.tag_id FROM file as f, file_tag as ft where f.id = ft.file_id");
+                            $fileStmt->execute() or die(mysqli_error());
                         
                             //insert each into the table
                             $i = 1;
-                            while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                                fileTableRow($i, splitFileName($result["name"], 20), null, $adminPriv);
+                            while ($fileResult = $fileStmt->fetch(PDO::FETCH_ASSOC)) {
+                                //for each, find the tag name for the tag index
+                                $tagStmt = $connection->prepare("SELECT name from tag where id = " . $fileResult["tag_id"]);
+                                $tagStmt->execute() or die(mysqli_error());
+                                $tagResult = $tagStmt->fetch(PDO::FETCH_ASSOC);
+                                
+                                fileTableRow($i, $fileResult["name"], $tagResult["name"], $adminPriv);
                                 $i++;
                             }
                             ?>
