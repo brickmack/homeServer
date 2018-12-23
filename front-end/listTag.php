@@ -50,19 +50,31 @@ if (isset($_SESSION["username"])) {
                         </thead>
                         <tbody>
                             <?php
-                            $fileStmt = $connection->prepare("SELECT f.name, ft.tag_id FROM file as f, file_tag as ft where f.id = ft.file_id");
+                            //SELECT f.name, group_concat(ft.tag_id separator ',') FROM file as f, file_tag as ft where f.id = ft.file_id group by f.id
+                            $fileStmt = $connection->prepare("SELECT f.name, ft.tag_id FROM file as f, file_tag as ft where f.id = ft.file_id limit 100");
                             $fileStmt->execute() or die(mysqli_error());
                         
-                            //insert each into the table
+                            $currentFile = "";
+                            $currentTags = "";
                             $i = 1;
+                            
                             while ($fileResult = $fileStmt->fetch(PDO::FETCH_ASSOC)) {
-                                //for each, find the tag name for the tag index
+                                if ($currentFile == $fileResult["name"]) {
+                                    //same file, we're going to append a new tag to it
+                                }
+                                else {
+                                    //previous file is done, add the row and start again
+                                    fileTableRow($i, $currentFile, $currentTags, $adminPriv);
+                                    $i++;
+                                    
+                                    $currentFile = $fileResult["name"];
+                                }
+                                
                                 $tagStmt = $connection->prepare("SELECT name from tag where id = " . $fileResult["tag_id"]);
-                                $tagStmt->execute() or die(mysqli_error());
+                                $tagStmt->execute() or die(mysqli_error($connection));
                                 $tagResult = $tagStmt->fetch(PDO::FETCH_ASSOC);
                                 
-                                fileTableRow($i, $fileResult["name"], $tagResult["name"], $adminPriv);
-                                $i++;
+                                $currentTags = $currentTags . ", " . $tagResult["name"];
                             }
                             ?>
                         </tbody>
