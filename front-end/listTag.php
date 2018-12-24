@@ -34,6 +34,14 @@ if (isset($_SESSION["username"])) {
 				</div>
 				<div class="col-sm-8 text-left">
 					<h2>Search</h2>
+					
+					<?php
+					if (isset($_GET["q"])) {
+					    $q = $_GET["q"];
+					    echo 'Searching for ' . htmlspecialchars($q) . '!';
+					}
+					?>
+
 					<table class="table" id="table" style="-ms-overflow-style: -ms-autohiding-scrollbar; max-height: 200px; margin: 10px auto;">
 					    <thead>
                             <tr>
@@ -82,35 +90,6 @@ if (isset($_SESSION["username"])) {
                                     $prevTags = $prevTags . ", " . $currentTag;
                                 }
                             }
-                            /*
-                            if ($fileResult = $fileStmt->fetch(PDO::FETCH_ASSOC)) {
-                                $currentFile = $fileResult["name"];
-                                
-                                $tagStmt = $connection->prepare("SELECT name from tag where id = " . $fileResult["tag_id"]);
-                                $tagStmt->execute() or die(mysqli_error($connection));
-                                $tagResult = $tagStmt->fetch(PDO::FETCH_ASSOC);
-                                
-                                $currentTags = $tagResult["name"];
-                                
-                                $i = 1;
-                                
-                                while ($fileResult = $fileStmt->fetch(PDO::FETCH_ASSOC)) {
-                                    if ($currentFile != $fileResult["name"]) {
-                                        //previous file is done, add the row and start again
-                                        fileTableRow($i, $currentFile, $currentTags, $adminPriv);
-                                        $i++;
-                                    
-                                        $currentFile = $fileResult["name"];
-                                    }
-                                
-                                    $tagStmt = $connection->prepare("SELECT name from tag where id = " . $fileResult["tag_id"]);
-                                    $tagStmt->execute() or die(mysqli_error($connection));
-                                    $tagResult = $tagStmt->fetch(PDO::FETCH_ASSOC);
-                                
-                                    $currentTags = $currentTags . ", " . $tagResult["name"];
-                                }
-                            }
-                            */
                             ?>
                         </tbody>
 					</table>
