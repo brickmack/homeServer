@@ -33,7 +33,7 @@ if (isset($_SESSION["username"])) {
 				<div class="col-sm-2 sidenavr">
 				</div>
 				<div class="col-sm-8 text-left">
-					<h2>Porn</h2>
+					<h2>Search</h2>
 					<table class="table" id="table" style="-ms-overflow-style: -ms-autohiding-scrollbar; max-height: 200px; margin: 10px auto;">
 					    <thead>
                             <tr>
@@ -51,31 +51,66 @@ if (isset($_SESSION["username"])) {
                         <tbody>
                             <?php
                             //SELECT f.name, group_concat(ft.tag_id separator ',') FROM file as f, file_tag as ft where f.id = ft.file_id group by f.id
-                            $fileStmt = $connection->prepare("SELECT f.name, ft.tag_id FROM file as f, file_tag as ft where f.id = ft.file_id limit 100");
+                            $fileStmt = $connection->prepare("SELECT f.name, ft.tag_id FROM file as f, file_tag as ft where f.id = ft.file_id limit 500");
                             $fileStmt->execute() or die(mysqli_error());
-                        
-                            $currentFile = "";
-                            $currentTags = "";
+                            
+                            $prevFile = "";
+                            $prevTags = "";
                             $i = 1;
                             
                             while ($fileResult = $fileStmt->fetch(PDO::FETCH_ASSOC)) {
-                                if ($currentFile == $fileResult["name"]) {
-                                    //same file, we're going to append a new tag to it
-                                }
-                                else {
-                                    //previous file is done, add the row and start again
-                                    fileTableRow($i, $currentFile, $currentTags, $adminPriv);
-                                    $i++;
-                                    
-                                    $currentFile = $fileResult["name"];
-                                }
+                                $currentFile = $fileResult["name"];
                                 
                                 $tagStmt = $connection->prepare("SELECT name from tag where id = " . $fileResult["tag_id"]);
                                 $tagStmt->execute() or die(mysqli_error($connection));
                                 $tagResult = $tagStmt->fetch(PDO::FETCH_ASSOC);
                                 
-                                $currentTags = $currentTags . ", " . $tagResult["name"];
+                                $currentTag = $tagResult["name"];
+                                
+                                if ($currentFile != $prevFile) {
+                                    //previous file is done
+                                    if ($prevFile != "") {
+                                        //make sure its not the initialization still
+                                        fileTableRow($i, $prevFile, $prevTags, $adminPriv);
+                                        $i++;
+                                    }
+                                    $prevFile = $currentFile;
+                                    $prevTags = $currentTag;
+                                }
+                                else {
+                                    //continuing with the same file
+                                    $prevTags = $prevTags . ", " . $currentTag;
+                                }
                             }
+                            /*
+                            if ($fileResult = $fileStmt->fetch(PDO::FETCH_ASSOC)) {
+                                $currentFile = $fileResult["name"];
+                                
+                                $tagStmt = $connection->prepare("SELECT name from tag where id = " . $fileResult["tag_id"]);
+                                $tagStmt->execute() or die(mysqli_error($connection));
+                                $tagResult = $tagStmt->fetch(PDO::FETCH_ASSOC);
+                                
+                                $currentTags = $tagResult["name"];
+                                
+                                $i = 1;
+                                
+                                while ($fileResult = $fileStmt->fetch(PDO::FETCH_ASSOC)) {
+                                    if ($currentFile != $fileResult["name"]) {
+                                        //previous file is done, add the row and start again
+                                        fileTableRow($i, $currentFile, $currentTags, $adminPriv);
+                                        $i++;
+                                    
+                                        $currentFile = $fileResult["name"];
+                                    }
+                                
+                                    $tagStmt = $connection->prepare("SELECT name from tag where id = " . $fileResult["tag_id"]);
+                                    $tagStmt->execute() or die(mysqli_error($connection));
+                                    $tagResult = $tagStmt->fetch(PDO::FETCH_ASSOC);
+                                
+                                    $currentTags = $currentTags . ", " . $tagResult["name"];
+                                }
+                            }
+                            */
                             ?>
                         </tbody>
 					</table>
