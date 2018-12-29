@@ -58,6 +58,70 @@ if (isset($_SESSION["username"])) {
                         </thead>
                         <tbody>
                             <?php
+                            //first load an array of the first n files
+                            $fileStmt = $connection->prepare("SELECT * from file limit 100");
+                            $fileStmt->execute() or die(mysqli_error());
+                            
+                            $fileNames = array();
+                            $fileIDs = array();
+                            
+                            //we maintain a separate list of tags, so we don't have to repeatedly look up each tag name hundreds of times
+                            $tagNames = array();
+                            $tagIDs = array();
+                            
+                            while ($fileResult = $fileStmt->fetch(PDO::FETCH_ASSOC)) {
+                                $fileNames[] = $fileResult["name"];
+                                $fileIDs[] = $fileResult["id"];
+                            }
+                            
+                            //now select all tags associations for each ID
+                            for ($i = 0; $i<count($fileNames); $i++) {
+                                $associatedTagStmt = $connection->prepare("SELECT ft.* from file_tag as ft where ft.file_id = " . $fileIDs[$i]);
+                                $associatedTagStmt->execute() or die(mysqli_error());
+                                
+                                $associatedTags = array();
+                                while ($associationResult = $associatedTagStmt->fetch(PDO::FETCH_ASSOC)) {
+                                    //check if ID is in our cached table
+                                    if (count($tagIDs) == 0) {
+                                        echo "empty";
+                                        $tagStmt = $connection->prepare("SELECT name from tag where id = " . $associationResult["tag_id"]);
+                                        $tagStmt->execute() or die(mysqli_error($connection));
+                                        $tagResult = $tagStmt->fetch(PDO::FETCH_ASSOC);
+                                        
+                                        $tagIDs[] = $associationResult["tag_id"];
+                                        $tagNames[] = $tagResult["name"];
+                                        $associatedTags[] = $tagResult["name"];
+                                    }
+                                    else {
+                                        echo "count " . count($tagIDs) . "associated tags are " . implode(", ", $associatedTags) . "<br>";
+                                        $foundAt = -1;
+                                        for ($j = 0; $j<count($tagIDs); $j++) {
+                                            if ($tagIDs[$j] == $associationResult["tag_id"]) {
+                                                $foundAt = $j;
+                                                break;
+                                            }
+                                        }
+                                        if ($foundAt > -1) {
+                                            $associatedTags[] = $tagNames[$foundAt];
+                                            echo "added " . $tagNames[$foundAt];
+                                        }
+                                        else {
+                                            //wasn't there, we have to add it now.
+                                            $tagStmt = $connection->prepare("SELECT name from tag where id = " . $associationResult["tag_id"]);
+                                            $tagStmt->execute() or die(mysqli_error($connection));
+                                            $tagResult = $tagStmt->fetch(PDO::FETCH_ASSOC);
+                                            
+                                            $tagIDs[] = $associationResult["tag_id"];
+                                            $tagNames[] = $tagResult["name"];
+                                        }
+                                    }
+                                }
+                                
+                                echo $fileNames[$i] . ": " . implode(", ", $associatedTags) . "<br>";
+                            }
+                            
+                            
+                            /*
                             //SELECT f.name, group_concat(ft.tag_id separator ',') FROM file as f, file_tag as ft where f.id = ft.file_id group by f.id
                             $fileStmt = $connection->prepare("SELECT f.name, ft.tag_id FROM file as f, file_tag as ft where f.id = ft.file_id limit 500");
                             $fileStmt->execute() or die(mysqli_error());
@@ -90,6 +154,7 @@ if (isset($_SESSION["username"])) {
                                     $prevTags = $prevTags . ", " . $currentTag;
                                 }
                             }
+                            */
                             ?>
                         </tbody>
 					</table>
