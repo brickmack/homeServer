@@ -184,6 +184,16 @@ input::-moz-focus-inner {
 	padding-top: 30px;
 	min-height: 225px;
 }
+.col-sm-9 {
+	background-color: #FFFFFF;
+	padding-top: 30px;
+	min-height: 225px;
+}
+.col-sm-9 .intro {
+	background-color: #FFFFFF;
+	padding-top: 30px;
+	min-height: 225px;
+}
 .nav-link {
 	color: white;
 }

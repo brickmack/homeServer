@@ -32,7 +32,7 @@ if (isset($_SESSION["username"])) {
 			<div class="row row-eq-height" style="padding-top: 70px">
 				<div class="col-sm-2 sidenavr">
 				</div>
-				<div class="col-sm-8 text-left">
+				<div class="col-sm-9 text-left">
 					<h2>Search</h2>
 					
 					<?php
@@ -81,85 +81,35 @@ if (isset($_SESSION["username"])) {
                                 
                                 $associatedTags = array();
                                 while ($associationResult = $associatedTagStmt->fetch(PDO::FETCH_ASSOC)) {
-                                    //check if ID is in our cached table
-                                    if (count($tagIDs) == 0) {
-                                        echo "empty";
+                                    $foundAt = -1;
+                                    for ($j = 0; $j<count($tagIDs); $j++) {
+                                        if ($tagIDs[$j] == $associationResult["tag_id"]) {
+                                            $foundAt = $j;
+                                            break;
+                                        }
+                                    }
+                                    if ($foundAt > -1) {
+                                        $associatedTags[] = $tagNames[$foundAt];
+                                    }
+                                    else {
+                                        //wasn't there, we have to add it now.
                                         $tagStmt = $connection->prepare("SELECT name from tag where id = " . $associationResult["tag_id"]);
                                         $tagStmt->execute() or die(mysqli_error($connection));
                                         $tagResult = $tagStmt->fetch(PDO::FETCH_ASSOC);
-                                        
+                                            
                                         $tagIDs[] = $associationResult["tag_id"];
                                         $tagNames[] = $tagResult["name"];
                                         $associatedTags[] = $tagResult["name"];
                                     }
-                                    else {
-                                        echo "count " . count($tagIDs) . "associated tags are " . implode(", ", $associatedTags) . "<br>";
-                                        $foundAt = -1;
-                                        for ($j = 0; $j<count($tagIDs); $j++) {
-                                            if ($tagIDs[$j] == $associationResult["tag_id"]) {
-                                                $foundAt = $j;
-                                                break;
-                                            }
-                                        }
-                                        if ($foundAt > -1) {
-                                            $associatedTags[] = $tagNames[$foundAt];
-                                            echo "added " . $tagNames[$foundAt];
-                                        }
-                                        else {
-                                            //wasn't there, we have to add it now.
-                                            $tagStmt = $connection->prepare("SELECT name from tag where id = " . $associationResult["tag_id"]);
-                                            $tagStmt->execute() or die(mysqli_error($connection));
-                                            $tagResult = $tagStmt->fetch(PDO::FETCH_ASSOC);
-                                            
-                                            $tagIDs[] = $associationResult["tag_id"];
-                                            $tagNames[] = $tagResult["name"];
-                                        }
-                                    }
                                 }
                                 
-                                echo $fileNames[$i] . ": " . implode(", ", $associatedTags) . "<br>";
+                                fileTableRow($i, $fileNames[$i], $associatedTags, $adminPriv);
                             }
-                            
-                            
-                            /*
-                            //SELECT f.name, group_concat(ft.tag_id separator ',') FROM file as f, file_tag as ft where f.id = ft.file_id group by f.id
-                            $fileStmt = $connection->prepare("SELECT f.name, ft.tag_id FROM file as f, file_tag as ft where f.id = ft.file_id limit 500");
-                            $fileStmt->execute() or die(mysqli_error());
-                            
-                            $prevFile = "";
-                            $prevTags = "";
-                            $i = 1;
-                            
-                            while ($fileResult = $fileStmt->fetch(PDO::FETCH_ASSOC)) {
-                                $currentFile = $fileResult["name"];
-                                
-                                $tagStmt = $connection->prepare("SELECT name from tag where id = " . $fileResult["tag_id"]);
-                                $tagStmt->execute() or die(mysqli_error($connection));
-                                $tagResult = $tagStmt->fetch(PDO::FETCH_ASSOC);
-                                
-                                $currentTag = $tagResult["name"];
-                                
-                                if ($currentFile != $prevFile) {
-                                    //previous file is done
-                                    if ($prevFile != "") {
-                                        //make sure its not the initialization still
-                                        fileTableRow($i, $prevFile, $prevTags, $adminPriv);
-                                        $i++;
-                                    }
-                                    $prevFile = $currentFile;
-                                    $prevTags = $currentTag;
-                                }
-                                else {
-                                    //continuing with the same file
-                                    $prevTags = $prevTags . ", " . $currentTag;
-                                }
-                            }
-                            */
                             ?>
                         </tbody>
 					</table>
 				</div>
-				<div class="col-sm-2 sidenavr right"></div>
+				<div class="col-sm-1 sidenavr right"></div>
 			</div>
 		</div>
 	</div>

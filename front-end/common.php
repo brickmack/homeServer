@@ -1,11 +1,16 @@
 <?php
 function fileTableRow($rowNum, $name, $tags, $adminPriv) { 
 	$split = splitToLines($name, 20);
+	
+	$tagString = "<a href=\"" . $tags[0] . "\">" . $tags[0] . "</a>";
+	for ($i=1; $i<count($tags); $i++) {
+		$tagString = $tagString . ", " . "<a href=\"listTag.php?q=" . $tags[$i] . "\">" . $tags[$i] . "</a>";
+	}
 	?>
     <tr>
 	    <th scope="row" style="text-align: center;"><?php echo $rowNum;?></th>
 		<td><?php echo "<a href=\"/demoHome/$name\">$split</a>";?></td>
-		<td><?php echo $tags; ?></td>
+		<td><?php echo $tagString; ?></td>
 		<td style="text-align: center;">
 			<?php if ($adminPriv == true) { ?>
 			    <button type="button" class="btn btn-outline-danger" onclick="deleteRow(this)"><i class="fas fa-trash"></i>&nbsp;Delete</button>
