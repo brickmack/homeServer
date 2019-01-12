@@ -12,6 +12,17 @@ if (isset($_SESSION["username"])) {
         $adminPriv = true;
     }
 }
+
+//check search parameters
+if (isset($_GET["filenameCheck"])) {
+    $filenameCheck = true;
+}
+if (isset($_GET["tagCheck"])) {
+    $tagCheck = true;
+}
+if (isset($_GET["untaggedCheck"])) {
+    $untaggedCheck = true;
+}
 ?>
 <html lang="en">
 <head>
@@ -67,93 +78,44 @@ if (isset($_SESSION["username"])) {
 					if (isset($_GET["q"])) {
 					    $q = $_GET["q"];
 					    echo 'Searching for ' . htmlspecialchars($q) . '!<br>';
-					}
-					
-					if (!($page = $_GET["p"]) || $page < 0) {
-					    $page = 0;
-					}
-					
-					//get number of files
-					$countStmt = $connection->prepare("SELECT count(*) from file");
-                    $countStmt->execute() or die(mysqli_error());
-					$totalFiles = $countStmt->fetch()[0];
-					
-					$lower = $page * $increment;
-					$upper = ($page + 1) * $increment - 1;
-					
-					echo "Showing results $lower to $upper of $totalFiles in increments of $increment";
-					
-					prevNext($page, $totalFiles, $increment);
-					?>
-
-					<table class="table" id="table" style="-ms-overflow-style: -ms-autohiding-scrollbar; max-height: 200px; margin: 10px auto;">
-					    <thead>
-                            <tr>
-                                <th scope="col" style="text-align:center;">#</th>
-                                <th scope="col">Filename</th>
-                                <th scope="col">Tags</th>
-                                <?php
-                                if ($adminPriv == true) {
-                                    //action column is only available to admins
-                                    echo '<th scope="col" style="text-align:center;">Action</th>';
-                                }
-                                ?>
-                            </tr>
-                        </thead>
-                        <tbody>
+					    ?>
+					    <table class="table" id="table" style="-ms-overflow-style: -ms-autohiding-scrollbar; max-height: 200px; margin: 10px auto;">
+					        <thead>
+					            <tr>
+                                    <th scope="col" style="text-align:center;">#</th>
+                                    <th scope="col">Filename</th>
+                                    <th scope="col">Tags</th>
+                                    <?php
+                                    if ($adminPriv == true) {
+                                        //action column is only available to admins
+                                        echo '<th scope="col" style="text-align:center;">Action</th>';
+                                    }
+                                    ?>
+                                </tr>
+                            </thead>
+                            <tbody>
                             <?php
-                            $fileStmt = $connection->prepare("SELECT * from file limit $lower, $increment");
-                            $fileStmt->execute() or die(mysqli_error());
-                            
-                            $fileNames = array();
-                            $fileIDs = array();
-                            
-                            //we maintain a separate list of tags, so we don't have to repeatedly look up each tag name hundreds of times
-                            $tagNames = array();
-                            $tagIDs = array();
-                            
-                            while ($fileResult = $fileStmt->fetch(PDO::FETCH_ASSOC)) {
-                                $fileNames[] = $fileResult["name"];
-                                $fileIDs[] = $fileResult["id"];
-                            }
-                            
-                            //now select all tags associations for each ID
-                            for ($i = 0; $i<count($fileNames); $i++) {
-                                $associatedTagStmt = $connection->prepare("SELECT ft.* from file_tag as ft where ft.file_id = " . $fileIDs[$i]);
-                                $associatedTagStmt->execute() or die(mysqli_error());
-                                
-                                $associatedTags = array();
-                                while ($associationResult = $associatedTagStmt->fetch(PDO::FETCH_ASSOC)) {
-                                    $foundAt = -1;
-                                    for ($j = 0; $j<count($tagIDs); $j++) {
-                                        if ($tagIDs[$j] == $associationResult["tag_id"]) {
-                                            $foundAt = $j;
-                                            break;
-                                        }
-                                    }
-                                    if ($foundAt > -1) {
-                                        $associatedTags[] = $tagNames[$foundAt];
-                                    }
-                                    else {
-                                        //wasn't there, we have to add it now.
-                                        $tagStmt = $connection->prepare("SELECT name from tag where id = " . $associationResult["tag_id"]);
-                                        $tagStmt->execute() or die(mysqli_error($connection));
-                                        $tagResult = $tagStmt->fetch(PDO::FETCH_ASSOC);
-                                            
-                                        $tagIDs[] = $associationResult["tag_id"];
-                                        $tagNames[] = $tagResult["name"];
-                                        $associatedTags[] = $tagResult["name"];
-                                    }
+                            if ($filenameCheck == true) {
+                                $filenameStmt = $connection->prepare("select * from file where INSTR(name, '$q') > 0");
+                                $filenameStmt->execute() or die(mysqli_error());
+
+                                while ($fileResult = $filenameStmt->fetch(PDO::FETCH_ASSOC)) {
+                                    $fileNames[] = $fileResult["name"];
+                                    $fileIDs[] = $fileResult["id"];
                                 }
                                 
-                                fileTableRow(($lower+$i), $fileNames[$i], $associatedTags, $adminPriv);
+                                for ($i = 0; $i<count($fileNames); $i++) {
+                                    fileTableRow($i, $fileNames[$i], "", $adminPriv);
+                                }
                             }
                             ?>
-                        </tbody>
-					</table>
-					
-					<?php
-					prevNext($page, $totalFiles, $increment);
+                            </tbody>
+                        </table>
+					<?php  
+					}
+					else {
+					    echo "No query entered";
+					}
 					?>
 				</div>
 				<div class="col-sm-1 sidenavr right"></div>
