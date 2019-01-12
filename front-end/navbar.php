@@ -10,7 +10,7 @@
 		<a class="navbar-brand mr-1" href="home.php"><img alt="Logo" src="resource/logo.png" style="width:171px; height:47px;"></a>
 		<ul class="navbar-nav">
 <?php
-	foreach (array("Home", "Docs", "Porn") as $link) { ?>
+	foreach (array("Home", "Directory", "Search") as $link) { ?>
 			<li class="nav-item<?php if ($callingFile == strtolower($link)) {echo " active";}?>">
 				<a class="nav-link" href="<?php echo strtolower($link).".php"; ?>"><?php echo $link ?></a>
 			</li>
