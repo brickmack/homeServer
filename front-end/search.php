@@ -12,17 +12,6 @@ if (isset($_SESSION["username"])) {
         $adminPriv = true;
     }
 }
-
-function prevNext($page, $totalFiles, $increment) {
-    echo "<div>";
-    if ($page > 0) {
-        echo "<a href=\"search.php?p=" . ($page - 1) . "\">Prev</a>";
-    }
-    if ($page < ($totalFiles/$increment) - 1) {
-        echo "<a href=\"search.php?p=" . ($page + 1) . "\">Next</a>";
-    }
-    echo "</div>";
-}
 ?>
 <html lang="en">
 <head>
@@ -60,10 +49,8 @@ function prevNext($page, $totalFiles, $increment) {
 					    $q = $_GET["q"];
 					    echo 'Searching for ' . htmlspecialchars($q) . '!<br>';
 					}
-					if (isset($_GET["p"])) {
-					    $page = $_GET["p"];
-					}
-					else {
+					
+					if (!($page = $_GET["p"]) || $page < 0) {
 					    $page = 0;
 					}
 					
@@ -76,11 +63,9 @@ function prevNext($page, $totalFiles, $increment) {
 					$upper = ($page + 1) * $increment - 1;
 					
 					echo "Showing results $lower to $upper of $totalFiles in increments of $increment";
+					
+					prevNext($page, $totalFiles, $increment);
 					?>
-
-                    <?php
-                    prevNext($page, $totalFiles, $increment);
-                    ?>
 
 					<table class="table" id="table" style="-ms-overflow-style: -ms-autohiding-scrollbar; max-height: 200px; margin: 10px auto;">
 					    <thead>

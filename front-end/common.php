@@ -34,3 +34,16 @@ function splitToLines($text, $maxLength) {
 	return $formatted . "<br>" . $remaining;
 }
 ?>
+
+<?php
+function prevNext($page, $totalFiles, $increment) {
+    echo "<div>";
+    if ($page > 0) {
+        echo "<a href=\"search.php?p=" . ($page - 1) . "\">Prev</a>";
+    }
+    if ($page < ($totalFiles/$increment) - 1) {
+        echo "<a href=\"search.php?p=" . ($page + 1) . "\">Next</a>";
+    }
+    echo "</div>";
+}
+?>
