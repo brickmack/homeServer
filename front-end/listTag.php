@@ -36,10 +36,28 @@ if (isset($_SESSION["username"])) {
 					<h2>Search</h2>
 					
 					<?php
+					$count = 100;
+					
 					if (isset($_GET["q"])) {
 					    $q = $_GET["q"];
-					    echo 'Searching for ' . htmlspecialchars($q) . '!';
+					    echo 'Searching for ' . htmlspecialchars($q) . '!<br>';
 					}
+					if (isset($_GET["p"])) {
+					    $page = $_GET["p"];
+					}
+					else {
+					    $page = 0;
+					}
+					
+					//get number of files
+					$countStmt = $connection->prepare("SELECT count(*) from file");
+                    $countStmt->execute() or die(mysqli_error());
+					$totalFiles = $countStmt->fetch()[0];
+					
+					$lower = $page * $count;
+					$upper = ($page + 1) * $count - 1;
+					
+					echo "Showing results $lower to $upper of $totalFiles in increments of $count";
 					?>
 
 					<table class="table" id="table" style="-ms-overflow-style: -ms-autohiding-scrollbar; max-height: 200px; margin: 10px auto;">
@@ -58,8 +76,7 @@ if (isset($_SESSION["username"])) {
                         </thead>
                         <tbody>
                             <?php
-                            //first load an array of the first n files
-                            $fileStmt = $connection->prepare("SELECT * from file limit 100");
+                            $fileStmt = $connection->prepare("SELECT * from file limit $lower, $count");
                             $fileStmt->execute() or die(mysqli_error());
                             
                             $fileNames = array();
@@ -103,11 +120,18 @@ if (isset($_SESSION["username"])) {
                                     }
                                 }
                                 
-                                fileTableRow($i, $fileNames[$i], $associatedTags, $adminPriv);
+                                fileTableRow(($lower+$i), $fileNames[$i], $associatedTags, $adminPriv);
                             }
                             ?>
                         </tbody>
 					</table>
+					
+					<div>
+					    <?php
+					    echo "<a href=\"listTag.php?p=" . ($page - 1) . "\">Prev</a>";
+					    echo "<a href=\"listTag.php?p=" . ($page + 1) . "\">Next</a>";
+					    ?>
+					</div>
 				</div>
 				<div class="col-sm-1 sidenavr right"></div>
 			</div>
