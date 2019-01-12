@@ -12,6 +12,17 @@ if (isset($_SESSION["username"])) {
         $adminPriv = true;
     }
 }
+
+function prevNext($page, $totalFiles, $increment) {
+    echo "<div>";
+    if ($page > 0) {
+        echo "<a href=\"search.php?p=" . ($page - 1) . "\">Prev</a>";
+    }
+    if ($page < ($totalFiles/$increment) - 1) {
+        echo "<a href=\"search.php?p=" . ($page + 1) . "\">Next</a>";
+    }
+    echo "</div>";
+}
 ?>
 <html lang="en">
 <head>
@@ -35,8 +46,15 @@ if (isset($_SESSION["username"])) {
 				<div class="col-sm-9 text-left">
 					<h2>Search</h2>
 					
+					<div>
+					    <form action="search.php" method="GET">
+					        <input id="q" name="q" type="text">
+					        <input id="submit" type="submit" value="Submit">
+					    </form>
+					</div>
+					
 					<?php
-					$count = 100;
+					$increment = 100;
 					
 					if (isset($_GET["q"])) {
 					    $q = $_GET["q"];
@@ -54,11 +72,15 @@ if (isset($_SESSION["username"])) {
                     $countStmt->execute() or die(mysqli_error());
 					$totalFiles = $countStmt->fetch()[0];
 					
-					$lower = $page * $count;
-					$upper = ($page + 1) * $count - 1;
+					$lower = $page * $increment;
+					$upper = ($page + 1) * $increment - 1;
 					
-					echo "Showing results $lower to $upper of $totalFiles in increments of $count";
+					echo "Showing results $lower to $upper of $totalFiles in increments of $increment";
 					?>
+
+                    <?php
+                    prevNext($page, $totalFiles, $increment);
+                    ?>
 
 					<table class="table" id="table" style="-ms-overflow-style: -ms-autohiding-scrollbar; max-height: 200px; margin: 10px auto;">
 					    <thead>
@@ -76,7 +98,7 @@ if (isset($_SESSION["username"])) {
                         </thead>
                         <tbody>
                             <?php
-                            $fileStmt = $connection->prepare("SELECT * from file limit $lower, $count");
+                            $fileStmt = $connection->prepare("SELECT * from file limit $lower, $increment");
                             $fileStmt->execute() or die(mysqli_error());
                             
                             $fileNames = array();
@@ -126,12 +148,9 @@ if (isset($_SESSION["username"])) {
                         </tbody>
 					</table>
 					
-					<div>
-					    <?php
-					    echo "<a href=\"listTag.php?p=" . ($page - 1) . "\">Prev</a>";
-					    echo "<a href=\"listTag.php?p=" . ($page + 1) . "\">Next</a>";
-					    ?>
-					</div>
+					<?php
+					prevNext($page, $totalFiles, $increment);
+					?>
 				</div>
 				<div class="col-sm-1 sidenavr right"></div>
 			</div>
