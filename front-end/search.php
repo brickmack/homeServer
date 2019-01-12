@@ -19,6 +19,8 @@ if (isset($_SESSION["username"])) {
 		include 'head.php';
 		generateHead();
 	?>
+	
+	<script src="js/common.js"></script>
 </head>
 <body>
 <?php
@@ -39,11 +41,28 @@ if (isset($_SESSION["username"])) {
 					    <form action="search.php" method="GET">
 					        <input id="q" name="q" type="text">
 					        <input id="submit" type="submit" value="Submit">
+					        <br>
+					        <a href="" onclick="fold('advancedOptions'); return false">Advanced search</a>
+					        
+					        <div id="advancedOptions" style="display: none; background-color: grey">
+					            Search in:
+					            <ul style="list-style: none">
+					                <li><label><input name="filenameCheck" type="checkbox" value="true">Filenames</label></li>
+					                <li><label><input name="tagCheck" type="checkbox" value="true">Tags</label></li>
+					            </ul>
+					            
+					            <label><input name="untaggedCheck" type="checkbox" value="true">Include untagged files</label>
+					            
+					            <br>
+					            <label>Increment: <input name="incrementSize" type="text"></label>
+					        </div>
 					    </form>
 					</div>
 					
 					<?php
-					$increment = 100;
+					if (!($increment = $_GET["incrementSize"]) || $increment < 0) {
+					    $increment = 100;
+					}
 					
 					if (isset($_GET["q"])) {
 					    $q = $_GET["q"];
