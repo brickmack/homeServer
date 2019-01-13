@@ -14,13 +14,13 @@ if (isset($_SESSION["username"])) {
 }
 
 //check search parameters
-if (isset($_GET["filenameCheck"])) {
+if (isset($_REQUEST["filenameCheck"])) {
     $filenameCheck = true;
 }
-if (isset($_GET["tagCheck"])) {
+if (isset($_REQUEST["tagCheck"])) {
     $tagCheck = true;
 }
-if (isset($_GET["untaggedCheck"])) {
+if (isset($_REQUEST["untaggedCheck"])) {
     $untaggedCheck = true;
 }
 ?>
@@ -41,7 +41,6 @@ if (isset($_GET["untaggedCheck"])) {
 ?>
 	<div id="wrapper">
 		<div class="container-fluid text-center">
-			<!-- 3 row layout -->
 			<div class="row row-eq-height" style="padding-top: 70px">
 				<div class="col-sm-2 sidenavr">
 				</div>
@@ -49,34 +48,39 @@ if (isset($_GET["untaggedCheck"])) {
 					<h2>Search</h2>
 					
 					<div>
-					    <form action="search.php" method="GET">
-					        <input id="q" name="q" type="text">
-					        <input id="submit" type="submit" value="Submit">
-					        <br>
-					        <a href="" onclick="fold('advancedOptions'); return false">Advanced search</a>
-					        
-					        <div id="advancedOptions" style="display: none; background-color: grey">
-					            Search in:
-					            <ul style="list-style: none">
-					                <li><label><input name="filenameCheck" type="checkbox" value="true">Filenames</label></li>
-					                <li><label><input name="tagCheck" type="checkbox" value="true">Tags</label></li>
-					            </ul>
+					    <form action="search.php" method="POST" id="basicSearch" name="basicSearch">
+					    	<input id="q" name="q" type="text">
+					    	<input id="submit" type="submit" value="Submit">
+					    	<a href="" onclick="fold('advancedSearch'); fold('basicSearch'); return false">Advanced search</a>
+					    </form>
+					    
+					    <form action="search.php" method="POST" id="advancedSearch" name="advancedSearch" style="display: none;">
+					    	<input id="q" name="q" type="text">
+					    	<input id="submit" type="submit" value="Submit">
+					    	<a href="" onclick="fold('advancedSearch'); fold('basicSearch'); return false">Basic search</a>
+
+							<div>
+								Search in:
+								<ul style="list-style: none">
+									<li><label><input name="filenameCheck" type="checkbox" value="true">Filenames</label></li>
+									<li><label><input name="tagCheck" type="checkbox" value="true">Tags</label></li>
+								</ul>
 					            
-					            <label><input name="untaggedCheck" type="checkbox" value="true">Include untagged files</label>
-					            
-					            <br>
-					            <label>Increment: <input name="incrementSize" type="text"></label>
-					        </div>
+								<label><input name="untaggedCheck" type="checkbox" value="true">Include untagged files</label>
+
+								<br>
+								<label>Increment: <input name="incrementSize" type="text"></label>
+							</div>
 					    </form>
 					</div>
 					
 					<?php
-					if (!($increment = $_GET["incrementSize"]) || $increment < 0) {
+					if (!($increment = $_REQUEST["incrementSize"]) || $increment < 0) {
 					    $increment = 100;
 					}
 					
-					if (isset($_GET["q"])) {
-					    $q = $_GET["q"];
+					if (isset($_REQUEST["q"])) {
+					    $q = $_REQUEST["q"];
 					    echo 'Searching for ' . htmlspecialchars($q) . '!<br>';
 					    ?>
 					    <table class="table" id="table" style="-ms-overflow-style: -ms-autohiding-scrollbar; max-height: 200px; margin: 10px auto;">
